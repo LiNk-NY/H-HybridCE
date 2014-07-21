@@ -1,0 +1,3 @@
+#Git Ignore file 
+#No .Rhistory files
+*.Rhistory
