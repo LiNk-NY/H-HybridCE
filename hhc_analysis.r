@@ -117,13 +117,17 @@ comb
 
 #Figure 2 - use pdf() for final graphic
 png("PrefReasons.png")
-barplot(comb, col=gray.colors(4), beside=TRUE, legend.text=rownames(comb), main="Reasons for Course Format Preference", xlab="Course Format Preferences", ylab="Frequency Endorsed") 
+barplot(comb, col=gray.colors(4), beside=TRUE, legend.text=rownames(comb), main="Primary and Secondary Reasons for Course Format Preference", xlab="Course Format Preferences", ylab="Frequency Endorsed") 
 graphics.off()
 #Age by Preference
-summary( with(biosub, aov(Age~ MedPrefBIOS, data=biosub)))
+hist(survey$Age)
+with(biosub, kruskal.test(Age~ factor(MedPrefBIOS), data=biosub))
 with(biosub, by(Age, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sd = sd(x, na.rm=TRUE))}) )
+
+
 #Travel Time by Preference
-summary( with(biosub, aov(Travelminutes~ MedPrefBIOS, data=biosub)))
+hist(survey$Travelminutes)
+with(biosub, kruskal.test(Travelminutes~ factor(MedPrefBIOS), data=biosub))
 with(biosub, by(Travelminutes, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sd = sd(x, na.rm=TRUE))}))
 #Gender by Preference
 with(biosub, fisher.test(Gender, MedPrefBIOS))
@@ -143,5 +147,5 @@ with(biosub, xtabs(~RC1+MedPrefBIOS))
 #column percentages
 prop.table(with(biosub, xtabs(~RC1+MedPrefBIOS)),2)
 
-summary(with(biosub, aov(Travelminutes~ RC1, data=biosub)))
+with(biosub, kruskal.test(Travelminutes~ RC1, data=biosub))
 
