@@ -2,5 +2,5 @@
 #No .Rhistory files
 *.Rhistory
 .httr-oauth
-.swp
+*.swp
 .gitignore
