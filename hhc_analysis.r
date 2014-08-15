@@ -1,39 +1,17 @@
 ##Marcel Ramos
 ##YouTube viewing habits
-
-setwd("~/Fieldwork SPH/GitHub/H-HybridCE/")
-demo <- read.csv("~/Fieldwork SPH/Data/demographics.csv", header=TRUE)
-demo <- demo[,c("Gender", "Age.group", "Percentage")]
-demo$Percentage <- as.numeric(unlist(strsplit(as.character(demo$Percentage), split="0000%", fixed=TRUE)))
-summary(demo$Age.group)
-demo$AgeG <- factor(demo$Age.group, levels=c("18-24", "25-34", "35-44", "45-54", "55-64", "65-"))
-demo
-
-library(lattice)
-barchart(demo$Percentage~demo$AgeG, data=demo, groups=demo$Gender, auto.key=list(space="right"), main="Demographics by Age Group", xlab="Age Group", ylab="Percentage")
-
-devs <- read.csv("~/Fieldwork SPH/Data/devices.csv", header=TRUE)
-devs$devper <- round(devs$Views/sum(devs$Views)*100, 2)
-devs
-
 library(xlsx)
 cols <- 1:44
 cols <- cols[-c(13,17,30,33,35,36)]
 
-colnamesfile <- read.csv("~/Fieldwork SPH/Data/Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
+colnamesfile <- read.csv("../../Data/Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
+survey <- read.xlsx("../../Data/PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=cols, stringsAsFactors=FALSE)
 
-survey <- read.xlsx("~/Fieldwork SPH/Data/PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=cols, colClasses=NA, stringsAsFactors=FALSE)
 compl <- complete.cases(colnamesfile)
 colnames(survey) <- colnamesfile$V2[compl]
-chars <- c(8,15,32,33,35,36)
-for (i in chars) {
-        class(survey[,i]) <- "character"
-}
 
-summary(survey)
-
-survey$EpiBiosStatus[1] <- "PH750"
-survey$EpiBiosStatus[24] <- "PH750"
+#Students taking both were considered to be BIOS only
+survey$EpiBiosStatus[c(1,24)] <- "PH750"
 survey$EpiBiosStatus <- factor(survey$EpiBiosStatus, labels=c("Bios", "Epi"))
 
 #Totals
@@ -55,18 +33,13 @@ colSums(Hchoice)
 OtherChoice <- table(survey$FFormatOther, survey$EpiBiosStatus)
 colSums(OtherChoice)
 
-
-mean(survey$Travelminutes)
-sd(survey$Travelminutes)
-
-png("traveltime.png")
-plot(survey$Travelminutes, type="h", pch=0, ylab="Travel Time (to and from in Minutes)", xlab="", col=survey$EpiBiosStatus)
+plot(survey$Travelminutes, type="h", pch=0, ylab="Travel Time (to and from in Minutes)", xlab="", main="Student Travel Times by Course", col=survey$EpiBiosStatus)
 points(survey$Travelminutes, pch=0)
-abline(h=mean(survey$Travelminutes), lty=3)
-abline(h=100.1622-65.80665, lty=4)
-abline(h=100.1622+65.80665, lty=4)
+with(survey, abline(h=mean(Travelminutes), lty=3))
+with(survey, abline(h=mean(Travelminutes)-sd(Travelminutes), lty=4))
+with(survey, abline(h=mean(Travelminutes)+sd(Travelminutes), lty=4))
 legend("top", legend=c("Biostatistics","Epidemiology"), col=c("black","red"), lty=1)
-graphics.off()
+#graphics.off()
 
 #boxplot(survey$Travelminutes, type="h")
 
@@ -111,13 +84,14 @@ nrow(biosub)
 #Primary and secondary reason for course pref selection
 comb <-  table(biosub$RC1, biosub$MedPrefBIOS) + table(biosub$RC2, biosub$MedPrefBIOS)
 comb
-colnames(comb) <- c("In-person", "Synchronous", "Asynchronous")
+colnames(comb) <- c("In-person", "Asynchronous", "Synchronous")
 rownames(comb) <- c("Interactivity", "Convenience", "Avoid Commuting", "Learning Preference")
 comb
 
 #Figure 2 - use pdf() for final graphic
+cols2 <- c("gray75", "gray55", "gray35", "gray15")
 png("PrefReasons.png")
-barplot(comb, col=gray.colors(4), beside=TRUE, legend.text=rownames(comb), main="Primary and Secondary Reasons for Course Format Preference", xlab="Course Format Preferences", ylab="Frequency Endorsed") 
+barplot(comb, col=cols2, beside=TRUE, legend.text=rownames(comb), main="Primary and Secondary Reasons for Course Format Preference", xlab="Course Format Preferences", ylab="Frequency Endorsed") 
 graphics.off()
 #Age by Preference
 hist(survey$Age)
