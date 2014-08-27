@@ -4,8 +4,8 @@ library(xlsx)
 cols <- 1:44
 cols <- cols[-c(13,17,30,33,35,36)]
 
-colnamesfile <- read.csv("../../Data/Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
-survey <- read.xlsx("../../Data/PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=cols, stringsAsFactors=FALSE)
+colnamesfile <- read.csv("~/Desktop/Data/Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
+survey <- read.xlsx("~/Desktop/Data/PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=cols, stringsAsFactors=FALSE)
 
 compl <- complete.cases(colnamesfile)
 colnames(survey) <- colnamesfile$V2[compl]
@@ -47,14 +47,14 @@ RC1 <- c("Interactivity", "Interactivity", NA, "Convenience", "Interactivity", "
          "Convenience", "LearnPref", "AvoidCommute", "LearnPref", "LearnPref", "LearnPref", "LearnPref")
 survey$RC1 <- factor(RC1, levels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"), labels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"))
 
-RC2 <- c("LearnPref", NA, NA, NA, NA, "Interactivity", NA, NA, "AvoidCommute", NA, 
-         NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, 
-         NA, NA, NA, "Interactivity", NA, NA, NA, NA, "Convenience", NA, 
+RC2 <- c("LearnPref", NA, NA, NA, NA, "Interactivity", NA, NA, "AvoidCommute", NA,
+         NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
+         NA, NA, NA, "Interactivity", NA, NA, NA, NA, "Convenience", NA,
          NA, NA, "Convenience", NA, "Interactivity", NA, "Convenience" )
 survey$RC2 <- factor(RC2,levels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"), labels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"))
 
-#checking reason labels - Primary Reason, BIOS Reasons, EPI Reasons, Secondary Reason 
-with(survey, paste(RC1, Reasons, RC2)) 
+#checking reason labels - Primary Reason, BIOS Reasons, EPI Reasons, Secondary Reason
+with(survey, paste(RC1, Reasons, RC2))
 
 table(survey$Race)
 library(plyr)
@@ -99,13 +99,13 @@ longdata <- reshape(vidata,
 longdata <- subset(longdata, select=-c(id))
 
 require(ggplot2)
-longdata$lecture <- factor(longdata$lecture, levels=c("L2","L3","L4","L5"), 
+longdata$lecture <- factor(longdata$lecture, levels=c("L2","L3","L4","L5"),
                            labels=c("Lecture 2", "Lecture 3", "Lecture 4", "Lecture 5"), ordered=TRUE)
 cols1 <- c("Lecture 2"="gray75", "Lecture 3"="gray55", "Lecture 4"="gray35", "Lecture 5"="gray15")
 
 p <- ggplot(longdata, aes(x=Day, y=views, fill=lecture)) + geom_area(position="stack")
 j <- p + geom_line(aes(ymax=views), position="stack") + theme_bw() + scale_fill_manual(values=cols1) +
-        theme(plot.background=element_blank(), 
+        theme(plot.background=element_blank(),
               panel.grid.major.x=element_blank(),
               panel.grid.major.y=element_line(size=0.1, color="gray"),
               panel.grid.minor=element_blank())
@@ -154,7 +154,7 @@ with(biosub, fisher.test(Race2, MedPrefBIOS))
 with(biosub, xtabs(~Race2+MedPrefBIOS))
 prop.table(with(biosub, xtabs(~Race2+MedPrefBIOS)),1) #table with row percentages
 #Reasons for Preference with in-group percentages and Fisher p-value
-comb; comb/totals ; print("Fisher's Exact test p-value");  fisher.test(comb)$p.value 
+comb; comb/totals ; print("Fisher's Exact test p-value");  fisher.test(comb)$p.value
 
 with(biosub, xtabs(~STEMstat+MedPrefBIOS));prop.table(with(biosub, xtabs(~STEMstat+MedPrefBIOS)),1 )
 with(biosub, fisher.test(STEMstat,MedPrefBIOS))
@@ -179,3 +179,14 @@ str(biosub[,-grep("epi", names(biosub), ignore.case=T)])
 
 #Alt result
 with(biosub, kruskal.test(Travelminutes~ RC1, data=biosub))
+
+biosub$Interactivity <- biosub$RC1=="Interactivity" | biosub$RC2=="Interactivity"
+biosub$Interactivity[is.na(biosub$Interactivity)] <- FALSE
+
+biosub$AvoidCommute <- biosub$RC1=="AvoidCommute" | biosub$RC2=="AvoidCommute"
+biosub$AvoidCommute[is.na(biosub$AvoidCommute)] <- FALSE
+
+boxplot(biosub$Travelminutes ~ biosub$MedPrefBIOS=="In person")
+
+with(biosub, kruskal.test(Travelminutes ~ AvoidCommute, data=biosub))
+boxplot(Travelminutes ~ AvoidCommute, data=biosub, notch=TRUE)
