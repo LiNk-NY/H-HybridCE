@@ -4,8 +4,8 @@ library(xlsx)
 cols <- 1:44
 cols <- cols[-c(13,17,30,33,35,36)]
 
-colnamesfile <- read.csv("~/Desktop/Data/Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
-survey <- read.xlsx("~/Desktop/Data/PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=cols, stringsAsFactors=FALSE)
+colnamesfile <- read.csv("Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
+survey <- read.xlsx("PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=cols, stringsAsFactors=FALSE)
 
 compl <- complete.cases(colnamesfile)
 colnames(survey) <- colnamesfile$V2[compl]
@@ -37,9 +37,6 @@ legend("top", legend=c("Biostatistics","Epidemiology"), col=c("black","red"), lt
 #boxplot(survey$Travelminutes, type="h")
 
 #Reason for preferences
-!is.na(survey$MedPrefRBIOS)
-!is.na(survey$PrefEPIR)
-
 Reasons <- ifelse(!is.na(survey$MedPrefRBIOS)==TRUE, survey$MedPrefRBIOS, survey$PrefEPIR)
 RC1 <- c("Interactivity", "Interactivity", NA, "Convenience", "Interactivity", "AvoidCommute", "LearnPref", "Convenience", "LearnPref", "LearnPref",
          "Interactivity", "LearnPref", "Interactivity", "Convenience", "AvoidCommute", NA, "AvoidCommute", NA, "Interactivity", "LearnPref",
@@ -57,7 +54,7 @@ survey$RC2 <- factor(RC2,levels=c("Interactivity", "Convenience", "AvoidCommute"
 with(survey, paste(RC1, Reasons, RC2))
 
 table(survey$Race)
-library(plyr)
+require(plyr)
 survey$Race2 <- revalue(survey$Race, c("Asian"="Other", "Prefer not to respond"="Other", "South Asian/European Jew"="Other"))
 survey$Race2 <- factor(survey$Race2, levels=c("Other", "Hispanic", "Non-Hispanic black", "Non-Hispanic white"))
 
@@ -104,15 +101,18 @@ longdata$lecture <- factor(longdata$lecture, levels=c("L2","L3","L4","L5"),
 cols1 <- c("Lecture 2"="gray75", "Lecture 3"="gray55", "Lecture 4"="gray35", "Lecture 5"="gray15")
 
 p <- ggplot(longdata, aes(x=Day, y=views, fill=lecture)) + geom_area(position="stack")
-j <- p + geom_line(aes(ymax=views), position="stack") + theme_bw() + scale_fill_manual(values=cols1) +
-        theme(plot.background=element_blank(),
+q <- p + xlab("Date") + ylab("Number of views") + ggtitle("YouTube Video View Patterns per Lecture") + 
+        geom_vline(xintercept=as.numeric(longdata$Day[31]), lty=4, lwd=1)  + labs(fill="Online Lecture \n Videos")
+j <- q + geom_line(aes(ymax=views), position="stack") + scale_fill_manual(values=cols1) 
+k <- j + theme_bw() + theme(plot.background=element_blank(),
               panel.grid.major.x=element_blank(),
               panel.grid.major.y=element_line(size=0.1, color="gray"),
-              panel.grid.minor=element_blank())
-k <- j + xlab("Date") + ylab("Number of views") + ggtitle("YouTube Video View Patterns per Lecture") +
-        geom_vline(xintercept=as.numeric(longdata$Day[31]), lty=4, lwd=1)  + labs(fill="Online Lecture \n Videos")
-
+              panel.grid.minor=element_blank(),
+              axis.text.x = element_text(size=14), axis.text.y = element_text(size=14),
+              legend.title= element_text(size=14), legend.text=element_text(size=14),
+              text=element_text(size=16, family="serif") ) 
 print(k)
+
 #dev.copy(png, filename="YTviews.png", width=960)
 #dev.off()
 
@@ -127,12 +127,15 @@ comb; comb/totals
 
 #Figure 2 - use pdf() for final graphic
 cols2 <- c("gray75", "gray55", "gray35", "gray15")
-png("PrefReasons.png")
+#png("PrefReasons.png")
 #pdf("PrefReasons.pdf", width=6, height=6, paper="special")
 par(family="serif")
-barplot(comb, col=cols2, beside=TRUE, legend.text=rownames(comb), main="Reasons for Course Format Preference", xlab="Course Format Preferences", ylab="Frequency endorsed", axes=F)
+barplot(comb, col=cols2, beside=TRUE, legend.text=rownames(comb), main="Reasons for Course Format Preference", xlab="", xaxt="n", ylab="", axes=FALSE)
+axis(side=1, labels=colnames(comb), at=c(3,8,13), line=-.75, tick=FALSE)
+mtext("Frequency endorsed", side=2, at=3.5, line=2, cex=1.2)
+mtext("Course Format Preferences", side=1, at=8, line=1.5, cex=1.2)
 axis(side=2, las=2)
-graphics.off()
+#graphics.off()
 
 
 ###     TABLE 3         ###
@@ -156,28 +159,31 @@ prop.table(with(biosub, xtabs(~Race2+MedPrefBIOS)),1) #table with row percentage
 #Reasons for Preference with in-group percentages and Fisher p-value
 comb; comb/totals ; print("Fisher's Exact test p-value");  fisher.test(comb)$p.value
 
-with(biosub, xtabs(~STEMstat+MedPrefBIOS));prop.table(with(biosub, xtabs(~STEMstat+MedPrefBIOS)),1 )
+#Preference by STEM (ScienceTechnologyEngineeringMathematics) status
+with(biosub, xtabs(~STEMstat+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~STEMstat+MedPrefBIOS)),1 )
 with(biosub, fisher.test(STEMstat,MedPrefBIOS))
 
+#Preference by HybridCourse History
 with(biosub, xtabs(~HybridHist+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~HybridHist+MedPrefBIOS)),1 )
 with(biosub, fisher.test(HybridHist,MedPrefBIOS))
 
+#Preference by Responsible for care of children?
 with(biosub, xtabs(~CChild+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~CChild+MedPrefBIOS)),1 )
 with(biosub, fisher.test(CChild,MedPrefBIOS))
 
+#Preference by Full-time or Part-time student
 with(biosub, xtabs(~FTPT+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~FTPT+MedPrefBIOS)),1 )
 with(biosub, fisher.test(FTPT,MedPrefBIOS))
 
+#Preference by Confidence Level in Stats
 with(biosub, xtabs(~ConfLStatBIOS+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~ConfLStatBIOS+MedPrefBIOS)),1 )
 with(biosub, fisher.test(ConfLStatBIOS,MedPrefBIOS))
-
 
 #list of possible covars -- STEMstat HybridHist CChild FTPT ConfLStatBIOS            (Education, Program, WHours, JobStat)
 str(biosub[,-grep("epi", names(biosub), ignore.case=T)])
 
 
-
-#Alt result
+#Alt results
 with(biosub, kruskal.test(Travelminutes~ RC1, data=biosub))
 
 biosub$Interactivity <- biosub$RC1=="Interactivity" | biosub$RC2=="Interactivity"
