@@ -25,13 +25,13 @@ OtherChoice <- table(survey$FFormatOther, survey$EpiBiosStatus)
 colSums(OtherChoice)
 
 par(family="serif")
-plot(survey$Travelminutes, type="h", pch=0, ylab="Travel Time (to and from in Minutes)", xlab="", main="Student Travel Times by Course", col=survey$EpiBiosStatus, axes=F)
+plot(biosub$Travelminutes, type="h", ylab="Travel Time (to and from in Minutes)", xlab="", main="BIOS Student Travel Times by Preference", axes=F,  col=factor(biosub$MedPrefBIOS), lwd=2) 
 axis(side=2, las=2); axis(side=1) ; box()
-points(survey$Travelminutes, pch=0)
-with(survey, abline(h=mean(Travelminutes), lty=3))
-with(survey, abline(h=mean(Travelminutes)-sd(Travelminutes), lty=4))
-with(survey, abline(h=mean(Travelminutes)+sd(Travelminutes), lty=4))
-legend("top", legend=c("Biostatistics","Epidemiology"), col=c("black","red"), lty=1)
+points(biosub$Travelminutes, pch=0)
+with(biosub, abline(h=mean(Travelminutes), lty=3))
+with(biosub, abline(h=mean(Travelminutes)-sd(Travelminutes), lty=4))
+with(biosub, abline(h=mean(Travelminutes)+sd(Travelminutes), lty=4))
+legend("top", legend=c("In-person", "Asynchronous", "Synchronous"), col=1:3, lty=1)
 #graphics.off()
 
 #boxplot(survey$Travelminutes, type="h")
@@ -57,6 +57,8 @@ table(survey$Race)
 require(plyr)
 survey$Race2 <- revalue(survey$Race, c("Asian"="Other", "Prefer not to respond"="Other", "South Asian/European Jew"="Other"))
 survey$Race2 <- factor(survey$Race2, levels=c("Other", "Hispanic", "Non-Hispanic black", "Non-Hispanic white"))
+survey$Job <- revalue(survey$JobStat, c("No"="No/No Answer", "Prefer not to respond"="No/No Answer"))
+survey$Job <- factor(survey$Job, levels=c("No/No Answer", "Full-time", "Part-time"))
 
 survey$Gender[11] <- NA
 survey$Gender <- factor(survey$Gender, levels=c("Female", "Male"))
@@ -65,10 +67,10 @@ survey$Gender <- factor(survey$Gender, levels=c("Female", "Male"))
 biosub <- subset(survey, survey$EpiBiosStatus=="Bios")
 
 ###     TABLE 1         ###
-by(survey$Age, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na.rm=TRUE), s = sd(x, na.rm=TRUE))})
+by(survey$Age, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))})
 table(survey$Gender, survey$EpiBiosStatus); prop.table(table(survey$Gender, survey$EpiBiosStatus), 2)
 table(survey$Race2, survey$EpiBiosStatus); prop.table(table(survey$Race2, survey$EpiBiosStatus),2)
-by(survey$Travelminutes, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na.rm=TRUE), s = sd(x, na.rm=TRUE))})
+by(survey$Travelminutes, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))})
 
 #Course Preference by Class
 table(survey$MedPrefBIOS, survey$EpiBiosStatus) ; table(survey$MedPrefEPI, survey$EpiBiosStatus)
@@ -141,12 +143,12 @@ axis(side=2, las=2)
 ###     TABLE 3         ###
 #Age by Preference
 require(RColorBrewer)
-hist(biosub$Age, breaks=20, density=15, col=brewer.pal(5, "Set1"))
-with(biosub, by(Age, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sd = sd(x, na.rm=TRUE))}) )
+hist(biosub$Age, breaks=20, density=25, col=brewer.pal(5, "Set1"))
+with(biosub, by(Age, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))}) )
 with(biosub, kruskal.test(Age~ factor(MedPrefBIOS), data=biosub))
 #Travel Time by Preference
-hist(survey$Travelminutes, breaks=20, density=15, col=brewer.pal(5, "Dark2"))
-with(biosub, by(Travelminutes, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sd = sd(x, na.rm=TRUE))}))
+hist(survey$Travelminutes, breaks=20, density=25, col=brewer.pal(5, "Dark2"))
+with(biosub, by(Travelminutes, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))}))
 with(biosub, kruskal.test(Travelminutes~ factor(MedPrefBIOS), data=biosub))
 #Gender by Preference
 with(biosub, xtabs(~Gender+MedPrefBIOS))
@@ -164,6 +166,8 @@ with(biosub, xtabs(~STEMstat+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~STEM
 with(biosub, fisher.test(STEMstat,MedPrefBIOS))
 
 #Preference by HybridCourse History
+biosub$HybridHist[biosub$HybridHist >= 2] <- 2
+biosub$HybridHist <- factor(biosub$HybridHist, levels=c(0,1,2), labels=c("Zero", "One", "Two+") )
 with(biosub, xtabs(~HybridHist+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~HybridHist+MedPrefBIOS)),1 )
 with(biosub, fisher.test(HybridHist,MedPrefBIOS))
 
@@ -171,16 +175,24 @@ with(biosub, fisher.test(HybridHist,MedPrefBIOS))
 with(biosub, xtabs(~CChild+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~CChild+MedPrefBIOS)),1 )
 with(biosub, fisher.test(CChild,MedPrefBIOS))
 
-#Preference by Full-time or Part-time student
-with(biosub, xtabs(~FTPT+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~FTPT+MedPrefBIOS)),1 )
-with(biosub, fisher.test(FTPT,MedPrefBIOS))
-
 #Preference by Confidence Level in Stats
 with(biosub, xtabs(~ConfLStatBIOS+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~ConfLStatBIOS+MedPrefBIOS)),1 )
 with(biosub, fisher.test(ConfLStatBIOS,MedPrefBIOS))
 
-#list of possible covars -- STEMstat HybridHist CChild FTPT ConfLStatBIOS            (Education, Program, WHours, JobStat)
+#Preference by Job Status (recoded)
+with(biosub, xtabs(~Job+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~Job+MedPrefBIOS)),1 )
+with(biosub, fisher.test(Job,MedPrefBIOS))
+
+#list of possible covars -- STEMstat HybridHist CChild ConfLStatBIOS JobStat            (FTPT, Education, Program, WHours)
 str(biosub[,-grep("epi", names(biosub), ignore.case=T)])
+
+#Preference by Full-time or Part-time student --- Mention
+#with(biosub, xtabs(~FTPT+MedPrefBIOS)) ; prop.table(with(biosub, xtabs(~FTPT+MedPrefBIOS)),1 )
+#with(biosub, fisher.test(FTPT,MedPrefBIOS))
+
+#Work Hours
+#with(biosub, by(WHours, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))}))
+#with(biosub, kruskal.test(WHours~factor(MedPrefBIOS), data=biosub))
 
 
 #Alt results
