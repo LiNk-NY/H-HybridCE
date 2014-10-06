@@ -1,5 +1,6 @@
 ##Marcel Ramos
 ##YouTube viewing habits
+
 library(xlsx)
 cols <- 1:44
 cols <- cols[-c(13,17,30,33,35,36)]
@@ -17,12 +18,6 @@ survey$EpiBiosStatus <- factor(survey$EpiBiosStatus, labels=c("Bios", "Epi"))
 #Totals
 table(survey$EpiBiosStatus)
 
-
-#Course format choice if participant were to re-take course in the future
-Hchoice <- table(survey$FFormatThis, survey$EpiBiosStatus)
-colSums(Hchoice)
-OtherChoice <- table(survey$FFormatOther, survey$EpiBiosStatus)
-colSums(OtherChoice)
 
 par(family="serif")
 plot(biosub$Travelminutes, type="h", ylab="Travel Time (to and from in Minutes)", xlab="", main="BIOS Student Travel Times by Preference", axes=F,  col=factor(biosub$MedPrefBIOS), lwd=2) 
@@ -59,7 +54,7 @@ survey$Race2 <- revalue(survey$Race, c("Asian"="Other", "Prefer not to respond"=
 survey$Race2 <- factor(survey$Race2, levels=c("Other", "Hispanic", "Non-Hispanic black", "Non-Hispanic white"))
 survey$Job <- revalue(survey$JobStat, c("No"="No/No Answer", "Prefer not to respond"="No/No Answer"))
 survey$Job <- factor(survey$Job, levels=c("No/No Answer", "Full-time", "Part-time"))
-
+        
 survey$Gender[11] <- NA
 survey$Gender <- factor(survey$Gender, levels=c("Female", "Male"))
 
@@ -75,13 +70,21 @@ by(survey$Travelminutes, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na
 #Course Preference by Class
 table(survey$MedPrefBIOS, survey$EpiBiosStatus) ; table(survey$MedPrefEPI, survey$EpiBiosStatus)
 
-###     TABLE 2         ###
 #assuming online for PH752 == Online after class is over
 prefs <- matrix(c(12,6,9,5,5,0), ncol=2, byrow=TRUE)
 rownames(prefs) <- c("In person", "Online after class", "Online during class")
 colnames(prefs) <- c("Bios", "Epi")
 tot <- matrix(rep(c(24,11),3), ncol=2, byrow=TRUE)
-prefs; prefs/tot
+prefs; prop.table(prefs, 2)
+
+fpre <- table(survey$RC1, survey$EpiBiosStatus) + table(survey$RC2, survey$EpiBiosStatus)
+fpre; fpre/matrix(c(rep(26,4), rep(11,4)), byrow=FALSE, ncol=2)
+
+#Course format choice if participant were to re-take course 
+survey$retake <- revalue(survey$FFormatThis, c("6 in-person only, 6 0nline only"="Other", "Option of each class in-person or recorded (not just online)"="Other", "Eight sessions in-person only, four sessions online only."="8 online, 4 in-person",
+                                               "I would like to have the option of attending each class in-person or online." ="Option of in-person or online", "Classes are in-person only"="In-person", "Classes are online only"="Online only",
+                                               "Classes are in person and recorded for viewing after the lecture is over" = "Other"))
+table(survey$retake, survey$EpiBiosStatus) ; prop.table(with(survey, xtabs(~retake+EpiBiosStatus)),2)
 
 ###     FIGURE 1        ###
 ### YouTube Viewing Patterns ###
@@ -103,8 +106,8 @@ longdata$lecture <- factor(longdata$lecture, levels=c("L2","L3","L4","L5"),
 cols1 <- c("Lecture 2"="gray75", "Lecture 3"="gray55", "Lecture 4"="gray35", "Lecture 5"="gray15")
 
 p <- ggplot(longdata, aes(x=Day, y=views, fill=lecture)) + geom_area(position="stack")
-q <- p + xlab("Date") + ylab("Number of views") + ggtitle("YouTube Video View Patterns per Lecture") + 
-        geom_vline(xintercept=as.numeric(longdata$Day[31]), lty=4, lwd=1)  + labs(fill="Online Lecture \n Videos")
+q <- p + xlab("Date") + ylab("Number of views") + labs(fill="Online Lecture /n Videos") +
+        geom_vline(xintercept=as.numeric(longdata$Day[31]), lty=4, lwd=1)  
 j <- q + geom_line(aes(ymax=views), position="stack") + scale_fill_manual(values=cols1) 
 k <- j + theme_bw() + theme(plot.background=element_blank(),
               panel.grid.major.x=element_blank(),
@@ -132,7 +135,7 @@ cols2 <- c("gray75", "gray55", "gray35", "gray15")
 #png("PrefReasons.png")
 #pdf("PrefReasons.pdf", width=6, height=6, paper="special")
 par(family="serif")
-barplot(comb, col=cols2, beside=TRUE, legend.text=rownames(comb), main="Reasons for Course Format Preference", xlab="", xaxt="n", ylab="", axes=FALSE)
+barplot(comb, col=cols2, beside=TRUE, legend.text=rownames(comb), xlab="", xaxt="n", ylab="", axes=FALSE)
 axis(side=1, labels=colnames(comb), at=c(3,8,13), line=-.75, tick=FALSE)
 mtext("Frequency endorsed", side=2, at=3.5, line=2, cex=1.2)
 mtext("Course Format Preferences", side=1, at=8, line=1.5, cex=1.2)
@@ -140,7 +143,7 @@ axis(side=2, las=2)
 #graphics.off()
 
 
-###     TABLE 3         ###
+###     TABLE 2         ###
 #Age by Preference
 require(RColorBrewer)
 hist(biosub$Age, breaks=20, density=25, col=brewer.pal(5, "Set1"))
