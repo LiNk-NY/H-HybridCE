@@ -2,11 +2,11 @@
 ##YouTube viewing habits
 
 library(xlsx)
-cols <- 1:44
-cols <- cols[-c(13,17,30,33,35,36)]
+colnums <- 1:44
+colnums <- colnums[-c(13,17,30,33,35,36)]
 
 colnamesfile <- read.csv("Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
-survey <- read.xlsx("PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=cols, stringsAsFactors=FALSE)
+survey <- read.xlsx("PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=colnums, stringsAsFactors=FALSE)
 
 compl <- complete.cases(colnamesfile)
 colnames(survey) <- colnamesfile$V2[compl]
@@ -46,7 +46,7 @@ RC2 <- c("LearnPref", NA, NA, NA, NA, "Interactivity", NA, NA, "AvoidCommute", N
 survey$RC2 <- factor(RC2,levels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"), labels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"))
 
 #checking reason labels - Primary Reason, BIOS Reasons, EPI Reasons, Secondary Reason
-with(survey, paste(RC1, Reasons, RC2))
+with(survey, paste(RC1, RC2, Reasons))
 
 table(survey$Race)
 require(plyr)
@@ -101,15 +101,18 @@ longdata <- reshape(vidata,
 longdata <- subset(longdata, select=-c(id))
 
 require(ggplot2)
+require(grid)
+require(RColorBrewer)
 longdata$lecture <- factor(longdata$lecture, levels=c("L2","L3","L4","L5"),
                            labels=c("Lecture 2", "Lecture 3", "Lecture 4", "Lecture 5"), ordered=TRUE)
-cols1 <- c("Lecture 2"="gray75", "Lecture 3"="gray55", "Lecture 4"="gray35", "Lecture 5"="gray15")
-
+cols0 <- c("Lecture 2"="gray85", "Lecture 3"="gray65", "Lecture 4"="gray45", "Lecture 5"="gray25")
+par(mar)
 p <- ggplot(longdata, aes(x=Day, y=views, fill=lecture)) + geom_area(position="stack")
-q <- p + xlab("Date") + ylab("Number of views") + labs(fill="Online Lecture /n Videos") +
+q <- p + xlab("Date") + ylab("Number of views") + labs(fill="Online Lecture \n Videos") +
         geom_vline(xintercept=as.numeric(longdata$Day[31]), lty=4, lwd=1)  
-j <- q + geom_line(aes(ymax=views), position="stack") + scale_fill_manual(values=cols1) 
+j <- q + geom_line(aes(ymax=views), position="stack") + scale_fill_manual(values=cols0) 
 k <- j + theme_bw() + theme(plot.background=element_blank(),
+              plot.margin = unit(c(0.5,0,0.5,0), "cm"),
               panel.grid.major.x=element_blank(),
               panel.grid.major.y=element_line(size=0.1, color="gray"),
               panel.grid.minor=element_blank(),
@@ -118,8 +121,8 @@ k <- j + theme_bw() + theme(plot.background=element_blank(),
               text=element_text(size=16, family="serif") ) 
 print(k)
 
-#dev.copy(png, filename="YTviews.png", width=960)
-#dev.off()
+#dev.copy(png, filename="YTviews.png", width=960); dev.off()
+#dev.copy(pdf, file="YTviews.pdf", height=4, width=8, paper="special"); dev.off()
 
 
 ###     FIGURE 2        ###
@@ -131,22 +134,21 @@ totals <- matrix(rep(c(12,9,5),4), byrow=TRUE, ncol=3)
 comb; comb/totals
 
 #Figure 2 - use pdf() for final graphic
-cols2 <- c("gray75", "gray55", "gray35", "gray15")
+cols1 <- brewer.pal(4, "Greys")
+dens <- seq(10,40, length.out=4)
 #png("PrefReasons.png")
 #pdf("PrefReasons.pdf", width=6, height=6, paper="special")
 par(family="serif")
-barplot(comb, col=cols2, beside=TRUE, legend.text=rownames(comb), xlab="", xaxt="n", ylab="", axes=FALSE)
+barplot(comb, col=cols1, beside=TRUE, legend.text=rownames(comb), xlab="", xaxt="n", ylab="", axes=FALSE)
 axis(side=1, labels=colnames(comb), at=c(3,8,13), line=-.75, tick=FALSE)
 mtext("Frequency endorsed", side=2, at=3.5, line=2, cex=1.2)
 mtext("Course Format Preferences", side=1, at=8, line=1.5, cex=1.2)
 axis(side=2, las=2)
 #graphics.off()
 
-
 ###     TABLE 2         ###
 #Age by Preference
-require(RColorBrewer)
-hist(biosub$Age, breaks=20, density=25, col=brewer.pal(5, "Set1"))
+hist(biosub$Age, breaks=20, density=c(seq(5, 25, 5)), col=brewer.pal(5, "Set1"))
 with(biosub, by(Age, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))}) )
 with(biosub, kruskal.test(Age~ factor(MedPrefBIOS), data=biosub))
 #Travel Time by Preference
