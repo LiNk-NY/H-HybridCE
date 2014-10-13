@@ -54,7 +54,6 @@ survey$Race2 <- revalue(survey$Race, c("Asian"="Other", "Prefer not to respond"=
 survey$Race2 <- factor(survey$Race2, levels=c("Other", "Hispanic", "Non-Hispanic black", "Non-Hispanic white"))
 survey$Job <- revalue(survey$JobStat, c("No"="No/No Answer", "Prefer not to respond"="No/No Answer"))
 survey$Job <- factor(survey$Job, levels=c("No/No Answer", "Full-time", "Part-time"))
-        
 survey$Gender[11] <- NA
 survey$Gender <- factor(survey$Gender, levels=c("Female", "Male"))
 
@@ -63,10 +62,11 @@ biosub <- subset(survey, survey$EpiBiosStatus=="Bios")
 
 ###     TABLE 1         ###
 by(survey$Age, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))})
+by(survey$Age, survey$EpiBiosStatus, FUN=function(x){c(MED = median(x, na.rm=TRUE), MIN = min(x, na.rm=TRUE), MAX = max(x,na.rm=TRUE))})
 table(survey$Gender, survey$EpiBiosStatus); prop.table(table(survey$Gender, survey$EpiBiosStatus), 2)
 table(survey$Race2, survey$EpiBiosStatus); prop.table(table(survey$Race2, survey$EpiBiosStatus),2)
 by(survey$Travelminutes, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))})
-
+by(survey$Travelminutes, survey$EpiBiosStatus, FUN=function(x){c(MED = median(x, na.rm=TRUE), MIN = min(x, na.rm=TRUE), MAX = max(x,na.rm=TRUE))})
 #Course Preference by Class
 table(survey$MedPrefBIOS, survey$EpiBiosStatus) ; table(survey$MedPrefEPI, survey$EpiBiosStatus)
 
@@ -150,11 +150,21 @@ axis(side=2, las=2)
 #Age by Preference
 hist(biosub$Age, breaks=20, density=c(seq(5, 25, 5)), col=brewer.pal(5, "Set1"))
 with(biosub, by(Age, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))}) )
+with(biosub, by(Age, MedPrefBIOS, FUN=function(x){c(MED=median(x,na.rm=TRUE), MIN = min(x, na.rm=TRUE), MAX = max(x, na.rm=TRUE))}))
 with(biosub, kruskal.test(Age~ factor(MedPrefBIOS), data=biosub))
+sampAgeMed <- with(biosub, median(Age, na.rm=TRUE))
+MedBin1 <- ifelse(biosub$Age>sampAgeMed, "Yes", "No")
+fisher.test(table(MedBin1,biosub$MedPrefBIOS))$p.value
+
 #Travel Time by Preference
 hist(survey$Travelminutes, breaks=20, density=25, col=brewer.pal(5, "Dark2"))
 with(biosub, by(Travelminutes, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))}))
+with(biosub, by(Travelminutes, MedPrefBIOS, FUN=function(x){c(MED=median(x,na.rm=TRUE), MIN = min(x, na.rm=TRUE), MAX = max(x, na.rm=TRUE))}))
 with(biosub, kruskal.test(Travelminutes~ factor(MedPrefBIOS), data=biosub))
+sampTMed <- with(biosub, median(Travelminutes, na.rm=TRUE))
+MedBin2 <- ifelse(biosub$Travelminutes>sampTMed, "Yes", "No")
+fisher.test(table(MedBin2, biosub$MedPrefBIOS))
+
 #Gender by Preference
 with(biosub, xtabs(~Gender+MedPrefBIOS))
 prop.table(with(biosub, xtabs(~Gender+MedPrefBIOS)),1) #percentages by row
