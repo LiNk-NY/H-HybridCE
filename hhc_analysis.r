@@ -1,12 +1,12 @@
-##Marcel Ramos
+## Marcel Ramos
 ##YouTube viewing habits
 
 library(xlsx)
 colnums <- 1:44
 colnums <- colnums[-c(13,17,30,33,35,36)]
 
-colnamesfile <- read.csv("Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
-survey <- read.xlsx("PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=colnums, stringsAsFactors=FALSE)
+colnamesfile <- read.csv("data-raw/Codebook1.csv", header=FALSE, colClasses=c("character", "character"), na.strings="NA")
+survey <- read.xlsx("data-raw/PH750-2 online tech 07-09.xlsx", sheetIndex=1, header=TRUE, colIndex=colnums, stringsAsFactors=FALSE)
 
 compl <- complete.cases(colnamesfile)
 colnames(survey) <- colnamesfile$V2[compl]
@@ -14,21 +14,6 @@ colnames(survey) <- colnamesfile$V2[compl]
 #Students taking both were considered to be BIOS only
 survey$EpiBiosStatus[c(1,24)] <- "PH750"
 survey$EpiBiosStatus <- factor(survey$EpiBiosStatus, labels=c("Bios", "Epi"))
-
-#Totals
-table(survey$EpiBiosStatus)
-
-
-par(family="serif")
-plot(biosub$Travelminutes, type="h", ylab="Travel Time (to and from in Minutes)", xlab="", main="BIOS Student Travel Times by Preference", axes=F,  col=factor(biosub$MedPrefBIOS), lwd=2) 
-axis(side=2, las=2); axis(side=1) ; box()
-points(biosub$Travelminutes, pch=0)
-with(biosub, abline(h=mean(Travelminutes), lty=3))
-with(biosub, abline(h=mean(Travelminutes)-sd(Travelminutes), lty=4))
-with(biosub, abline(h=mean(Travelminutes)+sd(Travelminutes), lty=4))
-legend("top", legend=c("In-person", "Asynchronous", "Synchronous"), col=1:3, lty=1)
-#graphics.off()
-
 #boxplot(survey$Travelminutes, type="h")
 
 #Reason for preferences
@@ -37,7 +22,8 @@ RC1 <- c("Interactivity", "Interactivity", NA, "Convenience", "Interactivity", "
          "Interactivity", "LearnPref", "Interactivity", "Convenience", "AvoidCommute", NA, "AvoidCommute", NA, "Interactivity", "LearnPref",
          "LearnPref", "Convenience", "Convenience", "AvoidCommute", "LearnPref", "Interactivity", "Convenience", "Interactivity", "AvoidCommute", "LearnPref",
          "Convenience", "LearnPref", "AvoidCommute", "LearnPref", "LearnPref", "LearnPref", "LearnPref")
-survey$RC1 <- factor(RC1, levels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"), labels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"))
+survey$RC1 <- factor(RC1, levels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"),
+                     labels=c("Interactivity", "Convenience", "AvoidCommute", "LearnPref"))
 
 RC2 <- c("LearnPref", NA, NA, NA, NA, "Interactivity", NA, NA, "AvoidCommute", NA,
          NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
@@ -57,8 +43,6 @@ survey$Job <- factor(survey$Job, levels=c("No/No Answer", "Full-time", "Part-tim
 survey$Gender[11] <- NA
 survey$Gender <- factor(survey$Gender, levels=c("Female", "Male"))
 
-###     Subsetting for BIOS students    ###
-biosub <- subset(survey, survey$EpiBiosStatus=="Bios")
 
 ###     TABLE 1         ###
 by(survey$Age, survey$EpiBiosStatus, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))})
@@ -80,15 +64,14 @@ prefs; prop.table(prefs, 2)
 fpre <- table(survey$RC1, survey$EpiBiosStatus) + table(survey$RC2, survey$EpiBiosStatus)
 fpre; fpre/matrix(c(rep(26,4), rep(11,4)), byrow=FALSE, ncol=2)
 
-#Course format choice if participant were to re-take course 
+# Course format choice if participant were to re-take course
 survey$retake <- revalue(survey$FFormatThis, c("6 in-person only, 6 0nline only"="Other", "Option of each class in-person or recorded (not just online)"="Other", "Eight sessions in-person only, four sessions online only."="8 online, 4 in-person",
                                                "I would like to have the option of attending each class in-person or online." ="Option of in-person or online", "Classes are in-person only"="In-person", "Classes are online only"="Online only",
                                                "Classes are in person and recorded for viewing after the lecture is over" = "Other"))
 table(survey$retake, survey$EpiBiosStatus) ; prop.table(with(survey, xtabs(~retake+EpiBiosStatus)),2)
 
-###     FIGURE 1        ###
 ### YouTube Viewing Patterns ###
-vidata <- read.csv("F1data.csv")
+vidata <- read.csv("data-raw/F1data.csv")
 vidata$Day <- as.Date(vidata$Day, format="%m/%d/%Y")
 vidata$views <- rowSums(vidata[,2:5])
 
@@ -100,17 +83,22 @@ longdata <- reshape(vidata,
                     direction = "long")
 longdata <- subset(longdata, select=-c(id))
 
-require(ggplot2)
-require(grid)
-require(RColorBrewer)
+library(ggplot2)
+library(grid)
+library(RColorBrewer)
+
 longdata$lecture <- factor(longdata$lecture, levels=c("L2","L3","L4","L5"),
                            labels=c("Lecture 2", "Lecture 3", "Lecture 4", "Lecture 5"), ordered=TRUE)
 cols0 <- c("Lecture 2"="gray85", "Lecture 3"="gray65", "Lecture 4"="gray45", "Lecture 5"="gray25")
-par(mar)
+
+###     FIGURE 2        ###
+# YouTube Lecture Viewing Patterns
+postscript("YouTubeViewsF2.eps", width = 8, height = 4, paper = "special", horizontal = FALSE)
+
 p <- ggplot(longdata, aes(x=Day, y=views, fill=lecture)) + geom_area(position="stack")
 q <- p + xlab("Date") + ylab("Number of views") + labs(fill="Online Lecture \n Videos") +
-        geom_vline(xintercept=as.numeric(longdata$Day[31]), lty=4, lwd=1)  
-j <- q + geom_line(aes(ymax=views), position="stack") + scale_fill_manual(values=cols0) 
+        geom_vline(xintercept=as.numeric(longdata$Day[31]), lty=4, lwd=1)
+j <- q + geom_line(aes(ymax=views), position="stack") + scale_fill_manual(values=cols0)
 k <- j + theme_bw() + theme(plot.background=element_blank(),
               plot.margin = unit(c(0.5,0,0.5,0), "cm"),
               panel.grid.major.x=element_blank(),
@@ -118,14 +106,34 @@ k <- j + theme_bw() + theme(plot.background=element_blank(),
               panel.grid.minor=element_blank(),
               axis.text.x = element_text(size=14), axis.text.y = element_text(size=14),
               legend.title= element_text(size=14), legend.text=element_text(size=14),
-              text=element_text(size=16, family="serif") ) 
+              text=element_text(size=16))
 print(k)
+
+dev.off()
 
 #dev.copy(png, filename="YTviews.png", width=960); dev.off()
 #dev.copy(pdf, file="YTviews.pdf", height=4, width=8, paper="special"); dev.off()
 
+###     Subsetting for BIOS students    ###
+biosub <- subset(survey, survey$EpiBiosStatus=="Bios")
 
-###     FIGURE 2        ###
+#Totals
+table(survey$EpiBiosStatus)
+
+## Exploratory Plot
+par(family="serif")
+plot(biosub$Travelminutes, type="h", ylab="Travel Time (to and from in Minutes)",
+     xlab="", main="BIOS Student Travel Times by Preference", axes=F,
+     col=factor(biosub$MedPrefBIOS), lwd=2)
+axis(side=2, las=2); axis(side=1) ; box()
+points(biosub$Travelminutes, pch=0)
+with(biosub, abline(h=mean(Travelminutes), lty=3))
+with(biosub, abline(h=mean(Travelminutes)-sd(Travelminutes), lty=4))
+with(biosub, abline(h=mean(Travelminutes)+sd(Travelminutes), lty=4))
+legend("top", legend=c("In-person", "Asynchronous", "Synchronous"), col=1:3, lty=1)
+#graphics.off()
+
+###     FIGURE 1        ###
 #Reasons for course pref selection
 comb <-  table(biosub$RC1, biosub$MedPrefBIOS) + table(biosub$RC2, biosub$MedPrefBIOS)
 colnames(comb) <- c("In-person", "Asynchronous", "Synchronous")
@@ -133,22 +141,25 @@ rownames(comb) <- c("Interactivity", "Convenience", "Avoid Commuting", "Learning
 totals <- matrix(rep(c(12,9,5),4), byrow=TRUE, ncol=3)
 comb; comb/totals
 
-#Figure 2 - use pdf() for final graphic
+# Figure 1 - encapsulatedpostscript for final graphic
+
+postscript("FormatPrefF1.eps", width = 6, height = 6, paper = "special", horizontal = FALSE)
+
 cols1 <- brewer.pal(4, "Greys")
 dens <- seq(10,40, length.out=4)
-#png("PrefReasons.png")
-#pdf("PrefReasons.pdf", width=6, height=6, paper="special")
-par(family="serif")
 barplot(comb, col=cols1, beside=TRUE, legend.text=rownames(comb), xlab="", xaxt="n", ylab="", axes=FALSE)
 axis(side=1, labels=colnames(comb), at=c(3,8,13), line=-.75, tick=FALSE)
 mtext("Frequency endorsed", side=2, at=3.5, line=2, cex=1.2)
 mtext("Course Format Preferences", side=1, at=8, line=1.5, cex=1.2)
 axis(side=2, las=2)
-#graphics.off()
+
+dev.off()
+
+# graphics.off()
 
 ###     TABLE 2         ###
-#Age by Preference
-hist(biosub$Age, breaks=20, density=c(seq(5, 25, 5)), col=brewer.pal(5, "Set1"))
+# Age by Preference
+hist(biosub$Age, breaks=20, density=c(seq(5, 25, 5)), col=brewer.pal(5, "Set1"), main = "Historgram", xlab = "Age (yrs.)")
 with(biosub, by(Age, MedPrefBIOS, FUN=function(x) {c(m = mean(x, na.rm=TRUE), sdev = sd(x, na.rm=TRUE))}) )
 with(biosub, by(Age, MedPrefBIOS, FUN=function(x){c(MED=median(x,na.rm=TRUE), MIN = min(x, na.rm=TRUE), MAX = max(x, na.rm=TRUE))}))
 with(biosub, kruskal.test(Age~ factor(MedPrefBIOS), data=biosub))

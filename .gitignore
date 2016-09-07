@@ -1,6 +1,13 @@
-#Git Ignore file 
+#Git Ignore file
 #No .Rhistory files
 *.Rhistory
 .httr-oauth
 *.swp
 .gitignore
+.Rproj.user
+*.xlsx
+*.docx
+*.eps
+*.png
+!FormatPrefF1.eps
+!YouTubeViewsF2.eps

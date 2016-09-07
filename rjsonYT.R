@@ -1,7 +1,5 @@
-install.packages("rjson")
 library(jsonlite)
-setwd("~/Fieldwork SPH/GitHub/H-HybridCE")
-json_file <- "~/Fieldwork SPH/GitHub/H-HybridCE/jsonoutput.json"
+json_file <- "data-raw/jsonoutput.json"
 jdat <- fromJSON(json_file)
 df <- jdat$rows
 df <- data.frame(df, stringsAsFactors=FALSE)
