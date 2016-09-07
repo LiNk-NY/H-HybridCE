@@ -93,7 +93,7 @@ cols0 <- c("Lecture 2"="gray85", "Lecture 3"="gray65", "Lecture 4"="gray45", "Le
 
 ###     FIGURE 2        ###
 # YouTube Lecture Viewing Patterns
-postscript("YouTubeViewsF2.eps", width = 8, height = 4, paper = "special", horizontal = FALSE)
+postscript("Figures/YouTubeViewsF2.eps", width = 8, height = 4, paper = "special", horizontal = FALSE)
 
 p <- ggplot(longdata, aes(x=Day, y=views, fill=lecture)) + geom_area(position="stack")
 q <- p + xlab("Date") + ylab("Number of views") + labs(fill="Online Lecture \n Videos") +
@@ -143,7 +143,7 @@ comb; comb/totals
 
 # Figure 1 - encapsulatedpostscript for final graphic
 
-postscript("FormatPrefF1.eps", width = 6, height = 6, paper = "special", horizontal = FALSE)
+postscript("Figures/FormatPrefF1.eps", width = 6, height = 6, paper = "special", horizontal = FALSE)
 
 cols1 <- brewer.pal(4, "Greys")
 dens <- seq(10,40, length.out=4)
