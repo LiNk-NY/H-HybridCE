@@ -17,7 +17,7 @@ barchart(demo$percentage~demo$AgeG, data = demo,
          main = "Demographics by Age Group",
          xlab = "Age Group", ylab = "Percentage")
 
-devs <- read.csv("data-raw/devices.csv", header = TRUE)
+devs <- read.csv("data-raw/YouTubeDevices.csv", header = TRUE)
 devs
 devs$devper <- round(devs$Views/sum(devs$Views)*100, 2)
 
