@@ -1,0 +1,155 @@
+﻿Survey
+Were you enrolled in PH750, PH752, or both in Fall 2014?
+*	PH750
+*	PH752
+*	Both
+
+SURVEY FOR PH 750 STUDENTS
+
+What was your overall satisfaction with PH750 - Introduction to Biostatistics?
+Very dissatisfied 1 - 5 Very satisfied
+How would you have rated your overall confidence level with statistics before beginning this course?
+Not at all confident 1 - 5 Very confident
+What was your preferred way to attend lectures for this course?
+*	In person
+*	Online while class is occurring
+*	Online after class is over
+*	Prefer not to respond
+Why did you prefer this format?
+[open response]
+Please give any other comments you have about the hybrid format of PH750.
+[open response]
+There were a total of 12 lectures in this course.  How many did you attend in-person?
+[open response]
+How many did you attend online in real-time (at the same time class was occurring)?
+[open response]
+How many did you attend online, after class was over?
+[open response]	
+If you attended lectures online, how important was it to be able to attend live (as the lecture occurs)?
+Not at all important 1- 5 Very important
+
+SURVEY QUESTIONS FOR PH752 STUDENTS
+
+What was your overall satisfaction with PH752 - Introduction to Epidemiology?
+Very dissatisfied 1 - 5 Very satisfied
+How would you have rated your overall confidence level with epidemiology before beginning this 
+course?
+Not at all confident 1 - 5 Very confident
+What was your preferred way to attend lectures for this course?
+*	In person
+*	Online
+*	Prefer not to respond
+Why did you prefer this format?
+[open response]
+Please give any other comments you have about the hybrid format of PH752.
+[open response]
+
+SURVEY QUESTIONS FOR ALL STUDENTS
+
+If you were to take this class again next semester, which format would you choose?
+*	Classes are in-person only
+*	Classes are online only
+*	Eight sessions in-person only, four sessions online only.
+*	I would like to have the option of attending each class in-person or online.
+*	Prefer not to respond
+*	Other: 				
+Which format would you choose for other Public Health courses?
+*	Classes are in-person only
+*	Classes are online only
+*	Eight sessions in-person only, four sessions online only.
+*	I would like to have the option of attending each class in-person or online.
+*	Prefer not to respond
+*	Other: 				
+What do you think are the main advantages to taking hybrid classes versus in person classes?
+[open response]
+What do you think are the main disadvantages to taking hybrid classes versus in person classes?
+[open response]
+How many hybrid courses (course that include both online and in-person components) have you taken in 
+the past, not including this one?
+[open response]
+How would you have rated your overall confidence level with statistics before beginning this course?
+Not at all confident 1 - 5 Very confident
+How would you have rated your overall confidence level with Excel before beginning this course?
+Not at all confident 1 - 5 Very confident
+How would you rate your overall confidence level in learning how to use new computer software?
+Not at all confident 1 - 5 Very confident
+Do you use social media (such as Facebook, Twitter, Instagram, etc):
+*	Daily or more frequently
+*	At least every week, but not every day
+*	Less than weekly
+*	Never
+*	Prefer not to respond
+How many minutes of total travel time does it take for you to attend a class on campus (including time 
+spent both getting to and from class)?
+[open response]
+Did you keep a job while attending school last semester?
+*	Full-time
+*	Part-time
+*	No
+*	Prefer not to respond
+If you answered the previous question "Yes", how many hours did you work in an average week (for 
+employment only, not including school work)?
+[open response]
+Are you responsible for the care of any children at home?
+*	Yes
+*	No
+*	Prefer not to respond
+What is your gender?
+*	Male
+*	Female
+*	Prefer not to respond
+How old are you?
+[open response]
+What is your race/ethnicity? 
+*	Non-Hispanic black
+*	Hispanic
+*	Non-Hispanic white
+*	Asian
+*	Prefer not to respond
+*	Other: 				
+Are you enrolled as a full-time or part-time student? 
+*	Full-time
+*	Part-time
+*	Prefer not to respond
+What program are you enrolled?
+*	Community Health Education
+*	Environmental & Occupational Health Science
+*	Epidemiology & Biostatistics
+*	Health Policy & Management
+*	Public Health Nutrition
+*	Community/Public Health Nursing/Urban Public Health
+*	Environmental & Occupational Health Sciences
+*	Nutrition
+*	Don't know
+*	Prefer not to respond
+*	Other: 				
+What is the highest level of school you have completed or the highest degree you have received?
+*	Bachelor's degree
+*	Master's degree
+*	Professional school degree (example: MD, DDS, DVM, JD)
+*	Doctoral degree
+*	Don't know
+*	Prefer not to respond
+*	Other: 				
+Do you have a degree in science, technology, engineering, mathematics?
+*	Yes
+*	No
+*	Prefer not to respond
+What grade did you receive in this course?
+*	A or A+
+*	A- or B+
+*	B or B-
+*	C+ or lower
+*	Prefer not to respond
+
+Your response has been recorded. 
+
+We are making every effort to ensure that no one knows what your responses were on the survey.  Google 
+is a well known company that collects data for online survey research.  The researchers are using an 
+encrypted version of their product to reduce the risk to subjects that their responses will be viewed by 
+unauthorized persons.  However, the study is not being run from a secure http server such as those used to 
+handle credit card transactions, so there is a small possibility that responses could be viewed by 
+unauthorized third parties, such as computer hackers.
+
+If you wish to enter the draw for a $50 Amazon gift certificate, please go to http://goo.gl/QKB2Hy.  This 
+form is independent from the survey responses.

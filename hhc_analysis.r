@@ -8,7 +8,7 @@ colnums <- colnums[-c(13,17,30,33,35,36)]
 colnamesfile <- read.csv("data-raw/Codebook1.csv", header = FALSE,
                          colClasses = c("character", "character"),
                          na.strings = "NA")
-survey <- read.xlsx("data-raw/PH750-2 online tech 07-09.xlsx",
+survey <- read.xlsx("data-raw/PH750-2SurveyData.xlsx",
                     sheetIndex = 1, header = TRUE,
                     colIndex = colnums, stringsAsFactors = FALSE)
 
