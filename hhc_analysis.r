@@ -5,7 +5,7 @@ library(xlsx)
 colnums <- 1:44
 colnums <- colnums[-c(13,17,30,33,35,36)]
 
-colnamesfile <- read.csv("data-raw/Codebook1.csv", header = FALSE,
+colnamesfile <- read.csv("data-raw/SurveyCodebook.csv", header = FALSE,
                          colClasses = c("character", "character"),
                          na.strings = "NA")
 survey <- read.xlsx("data-raw/PH750-2SurveyData.xlsx",
