@@ -1,71 +1,10 @@
 ## Marcel Ramos
-##YouTube viewing habits
+## YouTube viewing habits
 
 library(xlsx)
-colnums <- 1:44
-colnums <- colnums[-c(13,17,30,33,35,36)]
+library(plyr)
 
-colnamesfile <- read.csv("data-raw/SurveyCodebook.csv", header = FALSE,
-                         colClasses = c("character", "character"),
-                         na.strings = "NA")
-survey <- read.xlsx("data-raw/PH750-2SurveyData.xlsx",
-                    sheetIndex = 1, header = TRUE,
-                    colIndex = colnums, stringsAsFactors = FALSE)
-
-compl <- complete.cases(colnamesfile)
-colnames(survey) <- colnamesfile$V2[compl]
-
-#Students taking both were considered to be BIOS only
-survey$EpiBiosStatus[c(1,24)] <- "PH750"
-survey$EpiBiosStatus <- factor(survey$EpiBiosStatus, labels = c("Bios", "Epi"))
-#boxplot(survey$Travelminutes, type = "h")
-
-# Reason for preferences
-Reasons <- ifelse(!is.na(survey$MedPrefRBIOS) == TRUE,
-                  survey$MedPrefRBIOS, survey$PrefEPIR)
-
-# Coding responses manually
-RC1 <- c("Interactivity", "Interactivity", NA, "Convenience", "Interactivity",
-         "AvoidCommute", "LearnPref", "Convenience", "LearnPref", "LearnPref",
-         "Interactivity", "LearnPref", "Interactivity", "Convenience",
-         "AvoidCommute", NA, "AvoidCommute", NA, "Interactivity", "LearnPref",
-         "LearnPref", "Convenience", "Convenience", "AvoidCommute", "LearnPref",
-         "Interactivity", "Convenience", "Interactivity", "AvoidCommute",
-         "LearnPref", "Convenience", "LearnPref", "AvoidCommute", "LearnPref",
-         "LearnPref", "LearnPref", "LearnPref")
-
-survey$RC1 <- factor(RC1, levels = c("Interactivity", "Convenience",
-                                   "AvoidCommute", "LearnPref"),
-                     labels = c("Interactivity", "Convenience",
-                                "AvoidCommute", "LearnPref"))
-
-RC2 <- c("LearnPref", NA, NA, NA, NA, "Interactivity", NA, NA, "AvoidCommute",
-         NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA, NA,
-         "Interactivity", NA, NA, NA, NA, "Convenience", NA, NA, NA,
-         "Convenience", NA, "Interactivity", NA, "Convenience" )
-
-survey$RC2 <- factor(RC2, levels = c("Interactivity", "Convenience",
-                                     "AvoidCommute", "LearnPref"),
-                     labels = c("Interactivity", "Convenience",
-                                "AvoidCommute", "LearnPref"))
-
-#checking reason labels - Primary Reason, BIOS Reasons, EPI Reasons, Secondary Reason
-with(survey, paste(RC1, RC2, Reasons))
-
-table(survey$Race)
-require(plyr)
-survey$Race2 <- revalue(survey$Race, c("Asian" = "Other",
-                                       "Prefer not to respond" = "Other",
-                                       "South Asian/European Jew" = "Other"))
-survey$Race2 <- factor(survey$Race2,
-                       levels = c("Non-Hispanic white", "Non-Hispanic black",
-                                  "Hispanic", "Other"))
-survey$Job <- revalue(survey$JobStat,
-                      c("No" = "No/No Answer",
-                        "Prefer not to respond" = "No/No Answer"))
-survey$Job <- factor(survey$Job, levels = c("No/No Answer", "Full-time", "Part-time"))
-survey$Gender[11] <- NA
-survey$Gender <- factor(survey$Gender, levels = c("Female", "Male"))
+survey <- read.csv("data/PH750-2SurveyData.csv", stringsAsFactors = TRUE)
 
 numberSummaries <- function(number) {
     c(MIN = min(number, na.rm = TRUE),
@@ -95,14 +34,11 @@ by(survey$Travelminutes, survey$EpiBiosStatus, FUN = numberSummaries)
 
 # Course Preference by Class
 
-survey$MedPrefEPI2 <- factor(survey$MedPrefEPI, levels = c("In person", "Online", "Online after class is over"),
-                            labels = c("In person", "Synchronous", "Asynchronous"))
-survey$MedPrefBIOS2 <- factor(survey$MedPrefBIOS, levels = c("In person",
-                                                            "Online while class is occurring",
-                                                            "Online after class is over"),
-                             labels = c("In person", "Synchronous", "Asynchronous"))
-
 # online for PH752 == Online after class is over
+# Add missing category in 2nd Factor
+
+survey$MedPrefEPI2 <- factor(survey$MedPrefEPI2,
+                             levels = c("In person", "Synchronous", "Asynchronous"))
 prefs <- cbind(Bios = table(survey$MedPrefBIOS2), Epi = table(survey$MedPrefEPI2))
 prefs
 prop.table(prefs, 2)
@@ -110,41 +46,19 @@ prop.table(prefs, 2)
 fpre <- table(survey$RC1, survey$EpiBiosStatus) + table(survey$RC2, survey$EpiBiosStatus)
 fpre/colSums(prefs)
 
-# Course format choice if participant were to re-take course
-survey$retake <- revalue(survey$FFormatThis,
-                         c("6 in-person only, 6 0nline only" = "Other",
-                           "Option of each class in-person or recorded (not just online)" = "Other",
-                           "Eight sessions in-person only, four sessions online only." = "8 online, 4 in-person",
-                           "I would like to have the option of attending each class in-person or online." = "Option of in-person or online",
-                           "Classes are in-person only" = "In-person", "Classes are online only" = "Online only",
-                           "Classes are in person and recorded for viewing after the lecture is over" = "Other"))
-
 table(survey$retake, survey$EpiBiosStatus)
 prop.table(with(survey, xtabs(~retake+EpiBiosStatus)),2)
 
 ###     YouTube Viewing Patterns     ###
 ###             FIGURE 2             ###
 ### YouTube Lecture Viewing Patterns ###
-vidata <- read.csv("data-raw/Figure2YouTubeData.csv")
-vidata$Day <- as.Date(vidata$Day, format = "%m/%d/%Y")
-vidata$views <- rowSums(vidata[,2:5])
-
-longdata <- reshape(vidata,
-                    varying = c("L2", "L3", "L4", "L5"),
-                    v.names = "views",
-                    timevar = "lecture",
-                    times = c("L2", "L3", "L4", "L5"),
-                    direction = "long")
-longdata <- subset(longdata, select = -c(id))
-
 library(ggplot2)
 library(grid)
 library(RColorBrewer)
 
-longdata$lecture <- factor(longdata$lecture, levels = c("L2","L3","L4","L5"),
-                           labels = c("Lecture 2", "Lecture 3",
-                                    "Lecture 4", "Lecture 5"),
-                           ordered = TRUE)
+longdata <- read.csv("data/Figure2YouTubeData.csv", stringsAsFactors = FALSE)
+longdata$Day <- as.Date(longdata$Day, format = "%m/%d/%Y")
+
 cols0 <- c("Lecture 2" = "gray85", "Lecture 3" = "gray65",
            "Lecture 4" = "gray45", "Lecture 5" = "gray25")
 
@@ -154,7 +68,8 @@ postscript("Figures/YouTubeViewsF2.eps", width = 8, height = 4,
 p <- ggplot(longdata, aes(x = Day, y = views, fill = lecture)) +
     geom_area(position = "stack") + xlab("Date") + ylab("Number of views") +
     labs(fill = "Online Lecture \n Videos") +
-    geom_vline(xintercept = as.numeric(longdata$Day[31]), lty = 4, lwd = 1) +
+    geom_vline(xintercept = as.numeric(as.Date.character("2014-03-03")),
+               lty = 4, lwd = 1) +
     geom_line(aes(ymax = views), position = "stack") +
     scale_fill_manual(values = cols0) +
     theme_bw() + theme(plot.background = element_blank(),
@@ -167,6 +82,7 @@ p <- ggplot(longdata, aes(x = Day, y = views, fill = lecture)) +
                        legend.title = element_text(size = 14),
                        legend.text = element_text(size = 14),
                        text = element_text(size = 16))
+
 print(p)
 
 dev.off()
@@ -190,23 +106,25 @@ plot(biosub$Travelminutes, type = "h",
      col = factor(biosub$MedPrefBIOS), lwd = 2)
 axis(side = 2, las = 2)
 axis(side = 1)
-box()
 
 points(biosub$Travelminutes, pch = 0)
 with(biosub, abline(h = mean(Travelminutes), lty = 3))
 with(biosub, abline(h = mean(Travelminutes) - sd(Travelminutes), lty = 4))
 with(biosub, abline(h = mean(Travelminutes) + sd(Travelminutes), lty = 4))
-legend("top", legend = c("In-person", "Asynchronous", "Synchronous"),
+legend(x = 11, y = 225, legend = c("In-person", "Asynchronous", "Synchronous"),
        col = 1:3, lty = 1)
-#graphics.off()
+
+# graphics.off()
 
 ###     FIGURE 1        ###
 #Reasons for course pref selection
-comb <-  table(biosub$RC1, biosub$MedPrefBIOS) +
-    table(biosub$RC2, biosub$MedPrefBIOS)
-colnames(comb) <- c("In-person", "Asynchronous", "Synchronous")
-rownames(comb) <- c("Interactivity", "Convenience",
-                    "Avoid Commuting", "Learning Preference")
+comb <-  table(biosub$RC1, biosub$MedPrefBIOS2) +
+    table(biosub$RC2, biosub$MedPrefBIOS2)
+comb <- comb[,c("In person", "Asynchronous", "Synchronous")]
+comb <- comb[c("Interactivity", "Convenience",
+                    "AvoidCommute", "LearnPref"),]
+rownames(comb) <- c("Interactivity", "Convenience", "Avoid Commute",
+                    "Learning Preference")
 totals <- matrix(rep(c(12,9,5),4), byrow = TRUE, ncol = 3)
 comb/totals
 
@@ -265,8 +183,7 @@ prop.table(with(biosub, xtabs(~Race2+MedPrefBIOS)),1) #table with row percentage
 #Reasons for Preference with in-group percentages and Fisher p-value
 comb
 comb/totals
-print("Fisher's Exact test p-value")
-fisher.test(comb)$p.value
+cat("Fisher's Exact test p-value =", fisher.test(comb)$p.value)
 
 #Preference by STEM (ScienceTechnologyEngineeringMathematics) status
 with(biosub, xtabs(~STEMstat+MedPrefBIOS))
@@ -300,7 +217,7 @@ prop.table(with(biosub, xtabs(~Job+MedPrefBIOS)),1 )
 
 with(biosub, fisher.test(Job,MedPrefBIOS))
 
-# list of possible covars -- STEMstat HybridHist CChild ConfLStatBIOS JobStat
+# list - STEMstat HybridHist CChild ConfLStatBIOS JobStat
 # (FTPT, Education, Program, WHours)
 str(biosub[,-grep("epi", names(biosub), ignore.case = T)])
 
@@ -328,3 +245,4 @@ boxplot(biosub$Travelminutes ~ biosub$MedPrefBIOS == "In person")
 
 with(biosub, kruskal.test(Travelminutes ~ AvoidCommute, data = biosub))
 boxplot(Travelminutes ~ AvoidCommute, data = biosub, notch = TRUE)
+
