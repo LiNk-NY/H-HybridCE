@@ -123,7 +123,7 @@ comb <-  table(biosub$RC1, biosub$MedPrefBIOS2) +
 comb <- comb[,c("In person", "Asynchronous", "Synchronous")]
 comb <- comb[c("Interactivity", "Convenience",
                     "AvoidCommute", "LearnPref"),]
-rownames(comb) <- c("Interactivity", "Convenience", "Avoid Commute",
+rownames(comb) <- c("Interactivity", "Convenience", "Avoiding Commute",
                     "Learning Preference")
 totals <- matrix(rep(c(12,9,5),4), byrow = TRUE, ncol = 3)
 comb/totals
