@@ -58,8 +58,8 @@ survey$Race2 <- revalue(survey$Race, c("Asian" = "Other",
                                        "Prefer not to respond" = "Other",
                                        "South Asian/European Jew" = "Other"))
 survey$Race2 <- factor(survey$Race2,
-                       levels = c("Other", "Hispanic", "Non-Hispanic black",
-                                  "Non-Hispanic white"))
+                       levels = c("Non-Hispanic white", "Non-Hispanic black",
+                                  "Hispanic", "Other"))
 survey$Job <- revalue(survey$JobStat,
                       c("No" = "No/No Answer",
                         "Prefer not to respond" = "No/No Answer"))
@@ -68,44 +68,47 @@ survey$Gender[11] <- NA
 survey$Gender <- factor(survey$Gender, levels = c("Female", "Male"))
 
 numberSummaries <- function(number) {
-    c(MED = median(number, na.rm = TRUE),
-      MIN = min(number, na.rm = TRUE),
+    c(MIN = min(number, na.rm = TRUE),
+      MED = median(number, na.rm = TRUE),
       MAX = max(number, na.rm = TRUE))
 }
 
 meanSD <- function(number) {
+    round(
     c(m = mean(number, na.rm = TRUE),
-      sdev  = sd(number, na.rm = TRUE))
+      sdev  = sd(number, na.rm = TRUE)), 1)
 }
 
-###     TABLE 1         ###
+###     TABLE 1       ###
 by(survey$Age, survey$EpiBiosStatus, FUN = meanSD)
-by(survey$Age, survey$EpiBiosStatus, FUN = numberSummaries)
+# by(survey$Age, survey$EpiBiosStatus, FUN = numberSummaries)
 
 table(survey$Gender, survey$EpiBiosStatus)
-prop.table(table(survey$Gender, survey$EpiBiosStatus), 2)
+round(prop.table(table(survey$Gender, survey$EpiBiosStatus), 2), 2)*100
 
 table(survey$Race2, survey$EpiBiosStatus)
-prop.table(table(survey$Race2, survey$EpiBiosStatus),2)
+round(prop.table(table(survey$Race2, survey$EpiBiosStatus),2), 2)
 
 by(survey$Travelminutes, survey$EpiBiosStatus, FUN = meanSD)
 
 by(survey$Travelminutes, survey$EpiBiosStatus, FUN = numberSummaries)
 
 # Course Preference by Class
-table(survey$MedPrefBIOS, survey$EpiBiosStatus)
-table(survey$MedPrefEPI, survey$EpiBiosStatus)
 
-# assuming online for PH752 == Online after class is over
-prefs <- matrix(c(12,6,9,5,5,0), ncol = 2, byrow = TRUE)
-rownames(prefs) <- c("In person", "Online after class", "Online during class")
-colnames(prefs) <- c("Bios", "Epi")
-tot <- matrix(rep(c(24,11),3), ncol = 2, byrow = TRUE)
-prefs; prop.table(prefs, 2)
+survey$MedPrefEPI2 <- factor(survey$MedPrefEPI, levels = c("In person", "Online", "Online after class is over"),
+                            labels = c("In person", "Synchronous", "Asynchronous"))
+survey$MedPrefBIOS2 <- factor(survey$MedPrefBIOS, levels = c("In person",
+                                                            "Online while class is occurring",
+                                                            "Online after class is over"),
+                             labels = c("In person", "Synchronous", "Asynchronous"))
+
+# online for PH752 == Online after class is over
+prefs <- cbind(Bios = table(survey$MedPrefBIOS2), Epi = table(survey$MedPrefEPI2))
+prefs
+prop.table(prefs, 2)
 
 fpre <- table(survey$RC1, survey$EpiBiosStatus) + table(survey$RC2, survey$EpiBiosStatus)
-fpre
-fpre/matrix(c(rep(26,4), rep(11,4)), byrow = FALSE, ncol = 2)
+fpre/colSums(prefs)
 
 # Course format choice if participant were to re-take course
 survey$retake <- revalue(survey$FFormatThis,
@@ -119,7 +122,9 @@ survey$retake <- revalue(survey$FFormatThis,
 table(survey$retake, survey$EpiBiosStatus)
 prop.table(with(survey, xtabs(~retake+EpiBiosStatus)),2)
 
-### YouTube Viewing Patterns ###
+###     YouTube Viewing Patterns     ###
+###             FIGURE 2             ###
+### YouTube Lecture Viewing Patterns ###
 vidata <- read.csv("data-raw/Figure2YouTubeData.csv")
 vidata$Day <- as.Date(vidata$Day, format = "%m/%d/%Y")
 vidata$views <- rowSums(vidata[,2:5])
@@ -143,8 +148,6 @@ longdata$lecture <- factor(longdata$lecture, levels = c("L2","L3","L4","L5"),
 cols0 <- c("Lecture 2" = "gray85", "Lecture 3" = "gray65",
            "Lecture 4" = "gray45", "Lecture 5" = "gray25")
 
-###     FIGURE 2        ###
-# YouTube Lecture Viewing Patterns
 postscript("Figures/YouTubeViewsF2.eps", width = 8, height = 4,
            paper = "special", horizontal = FALSE, family = "Times")
 
@@ -236,7 +239,8 @@ with(biosub, by(Age, MedPrefBIOS, FUN = numberSummaries))
 with(biosub, kruskal.test(Age~ factor(MedPrefBIOS), data = biosub))
 sampAgeMed <- with(biosub, median(Age, na.rm = TRUE))
 MedBin1 <- ifelse(biosub$Age>sampAgeMed, "Yes", "No")
-fisher.test(table(MedBin1,biosub$MedPrefBIOS))$p.value
+fisher.test(table(MedBin1, biosub$MedPrefBIOS))$p.value
+
 
 #Travel Time by Preference
 hist(survey$Travelminutes, breaks = 20, density = 25,
