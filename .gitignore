@@ -6,8 +6,9 @@
 .gitignore
 .Rproj.user
 *.xlsx
-*.docx
 *.eps
 *.png
+/survey/*.docx
+
 !FormatPrefF1.eps
 !YouTubeViewsF2.eps
