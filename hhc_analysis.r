@@ -1,6 +1,8 @@
 ## Marcel Ramos
 ## YouTube viewing habits
-
+library(ggplot2)
+library(grid)
+library(RColorBrewer)
 library(xlsx)
 library(plyr)
 
@@ -17,6 +19,9 @@ meanSD <- function(number) {
     c(m = mean(number, na.rm = TRUE),
       sdev  = sd(number, na.rm = TRUE)), 1)
 }
+
+###     Subsetting for BIOS students    ###
+biosub <- subset(survey, survey$EpiBiosStatus == "Bios")
 
 ###     TABLE 1       ###
 by(survey$Age, survey$EpiBiosStatus, FUN = meanSD)
@@ -38,8 +43,10 @@ by(survey$Travelminutes, survey$EpiBiosStatus, FUN = numberSummaries)
 # Add missing category in 2nd Factor
 
 survey$MedPrefEPI2 <- factor(survey$MedPrefEPI2,
-                             levels = c("In person", "Synchronous", "Asynchronous"))
-prefs <- cbind(Bios = table(survey$MedPrefBIOS2), Epi = table(survey$MedPrefEPI2))
+                             levels =
+                                 c("In person", "Synchronous", "Asynchronous"))
+prefs <- cbind(Bios = table(survey$MedPrefBIOS2),
+               Epi = table(survey$MedPrefEPI2))
 prefs
 prop.table(prefs, 2)
 
@@ -52,9 +59,6 @@ prop.table(with(survey, xtabs(~retake+EpiBiosStatus)),2)
 ###     YouTube Viewing Patterns     ###
 ###             FIGURE 2             ###
 ### YouTube Lecture Viewing Patterns ###
-library(ggplot2)
-library(grid)
-library(RColorBrewer)
 
 longdata <- read.csv("data/Figure2YouTubeData.csv", stringsAsFactors = FALSE)
 longdata$Day <- as.Date(longdata$Day, format = "%m/%d/%Y")
@@ -91,30 +95,9 @@ dev.off()
 # dev.copy(pdf, file = "YTviews.pdf", height = 4, width = 8, paper = "special")
 # dev.off()
 
-###     Subsetting for BIOS students    ###
-biosub <- subset(survey, survey$EpiBiosStatus == "Bios")
 
 #Totals
 table(survey$EpiBiosStatus)
-
-## Exploratory Plot
-par(family = "serif")
-
-plot(biosub$Travelminutes, type = "h",
-     ylab = "Travel Time (to and from in Minutes)",
-     xlab = "", main = "BIOS Student Travel Times by Preference", axes = F,
-     col = factor(biosub$MedPrefBIOS), lwd = 2)
-axis(side = 2, las = 2)
-axis(side = 1)
-
-points(biosub$Travelminutes, pch = 0)
-with(biosub, abline(h = mean(Travelminutes), lty = 3))
-with(biosub, abline(h = mean(Travelminutes) - sd(Travelminutes), lty = 4))
-with(biosub, abline(h = mean(Travelminutes) + sd(Travelminutes), lty = 4))
-legend(x = 11, y = 225, legend = c("In-person", "Asynchronous", "Synchronous"),
-       col = 1:3, lty = 1)
-
-# graphics.off()
 
 ###     FIGURE 1        ###
 #Reasons for course pref selection
@@ -148,21 +131,15 @@ dev.off()
 
 ###     TABLE 2         ###
 # Age by Preference
-hist(biosub$Age, breaks = 20, density = c(seq(5, 25, 5)),
-     col = brewer.pal(5, "Set1"), main = "Historgram", xlab = "Age (yrs.)")
 with(biosub, by(Age, MedPrefBIOS, FUN = meanSD))
-
 with(biosub, by(Age, MedPrefBIOS, FUN = numberSummaries))
 
 with(biosub, kruskal.test(Age~ factor(MedPrefBIOS), data = biosub))
 sampAgeMed <- with(biosub, median(Age, na.rm = TRUE))
 MedBin1 <- ifelse(biosub$Age>sampAgeMed, "Yes", "No")
-fisher.test(table(MedBin1, biosub$MedPrefBIOS))$p.value
-
+fisher.test(table(MedBin1, biosub$MedPrefBIOS))
 
 #Travel Time by Preference
-hist(survey$Travelminutes, breaks = 20, density = 25,
-     col = brewer.pal(5, "Dark2"))
 with(biosub, by(Travelminutes, MedPrefBIOS, FUN = meanSD))
 
 with(biosub, by(Travelminutes, MedPrefBIOS, FUN = numberSummaries))
@@ -176,10 +153,12 @@ fisher.test(table(MedBin2, biosub$MedPrefBIOS))
 with(biosub, xtabs(~Gender+MedPrefBIOS))
 prop.table(with(biosub, xtabs(~Gender+MedPrefBIOS)),1) #percentages by row
 with(biosub, fisher.test(Gender, MedPrefBIOS))
+
 #Race by Preference
 with(biosub, fisher.test(Race2, MedPrefBIOS))
 with(biosub, xtabs(~Race2+MedPrefBIOS))
 prop.table(with(biosub, xtabs(~Race2+MedPrefBIOS)),1) #table with row percentages
+
 #Reasons for Preference with in-group percentages and Fisher p-value
 comb
 comb/totals
@@ -217,32 +196,11 @@ prop.table(with(biosub, xtabs(~Job+MedPrefBIOS)),1 )
 
 with(biosub, fisher.test(Job,MedPrefBIOS))
 
-# list - STEMstat HybridHist CChild ConfLStatBIOS JobStat
-# (FTPT, Education, Program, WHours)
-str(biosub[,-grep("epi", names(biosub), ignore.case = T)])
-
 # Preference by Full-time or Part-time student --- Mention
-# with(biosub, xtabs(~FTPT+MedPrefBIOS))
-# prop.table(with(biosub, xtabs(~FTPT+MedPrefBIOS)),1 )
+with(biosub, xtabs(~FTPT+MedPrefBIOS))
+prop.table(with(biosub, xtabs(~FTPT+MedPrefBIOS)),1 )
+with(biosub, fisher.test(FTPT,MedPrefBIOS))
 
-#with(biosub, fisher.test(FTPT,MedPrefBIOS))
-
-#Work Hours
-#with(biosub, by(WHours, MedPrefBIOS, FUN = function(x) {c(m = mean(x, na.rm = TRUE), sdev = sd(x, na.rm = TRUE))}))
-#with(biosub, kruskal.test(WHours~factor(MedPrefBIOS), data = biosub))
-
-
-#Alt results
-with(biosub, kruskal.test(Travelminutes~ RC1, data = biosub))
-
-biosub$Interactivity <- biosub$RC1 == "Interactivity" | biosub$RC2 == "Interactivity"
-biosub$Interactivity[is.na(biosub$Interactivity)] <- FALSE
-
-biosub$AvoidCommute <- biosub$RC1 == "AvoidCommute" | biosub$RC2 == "AvoidCommute"
-biosub$AvoidCommute[is.na(biosub$AvoidCommute)] <- FALSE
-
-boxplot(biosub$Travelminutes ~ biosub$MedPrefBIOS == "In person")
-
-with(biosub, kruskal.test(Travelminutes ~ AvoidCommute, data = biosub))
-boxplot(Travelminutes ~ AvoidCommute, data = biosub, notch = TRUE)
-
+# Work Hours
+with(biosub, by(WHours, MedPrefBIOS, FUN = function(x) {c(m = mean(x, na.rm = TRUE), sdev = sd(x, na.rm = TRUE))}))
+with(biosub, kruskal.test(WHours~factor(MedPrefBIOS), data = biosub))
