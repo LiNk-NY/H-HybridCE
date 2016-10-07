@@ -1,4 +1,17 @@
+## Exploratory Graphs
+source("demo.r")
+plot(survey$How.many.minutes.of.total.travel.time.does.it.take.for.you.to.attend.a.class.on.campus..including.time.spent.both.getting.to.and.from.class.., type = "h", pch = 0)
+points(survey$How.many.minutes.of.total.travel.time.does.it.take.for.you.to.attend.a.class.on.campus..including.time.spent.both.getting.to.and.from.class.., pch = 0)
+meanMinutes <- mean(survey$How.many.minutes.of.total.travel.time.does.it.take.for.you.to.attend.a.class.on.campus..including.time.spent.both.getting.to.and.from.class..)
+sdMinutes <- sd(survey$How.many.minutes.of.total.travel.time.does.it.take.for.you.to.attend.a.class.on.campus..including.time.spent.both.getting.to.and.from.class..)
+abline(h = meanMinutes, lty = 3)
+abline(h = meanMinutes - sdMinutes, lty = 4)
+abline(h = meanMinutes + sdMinutes, lty = 4)
+
+boxplot(survey$How.many.minutes.of.total.travel.time.does.it.take.for.you.to.attend.a.class.on.campus..including.time.spent.both.getting.to.and.from.class.., type = "h")
+
 ## Exploratory Plot
+source("hhc_analysis.r")
 par(family = "serif")
 
 plot(biosub$Travelminutes, type = "h",
