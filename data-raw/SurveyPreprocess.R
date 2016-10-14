@@ -1,5 +1,5 @@
 # Survey Dataset Preprocessing
-
+library(plyr)
 colnums <- 1:44
 colnums <- colnums[-c(13,17,30,33,35,36)]
 
@@ -80,4 +80,4 @@ survey$retake <- revalue(survey$FFormatThis,
                            "Classes are in-person only" = "In-person", "Classes are online only" = "Online only",
                            "Classes are in person and recorded for viewing after the lecture is over" = "Other"))
 
-write.csv(survey, "data/PH750-2SurveyData.csv")
+write_csv(survey, "data/PH750-2SurveyData.csv")
