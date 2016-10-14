@@ -8,6 +8,8 @@ library(plyr)
 
 survey <- read.csv("data/PH750-2SurveyData.csv", stringsAsFactors = TRUE)
 
+table(survey$retake)
+
 numberSummaries <- function(number) {
     c(MIN = min(number, na.rm = TRUE),
       MED = median(number, na.rm = TRUE),
